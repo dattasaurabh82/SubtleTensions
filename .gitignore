@@ -1,0 +1,13 @@
+# Mac OS X system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDEs and editors
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vscode/
+
+
+

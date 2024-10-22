@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 /*
 TBD:
 1. Double click forward button, increases speed to move forward.
@@ -67,10 +69,6 @@ const unsigned long limitRetractionSpeed = 50; // 25
 // END OF VARIABLE DEFINITIONS //
 // --------------------------- //
 
-
-
-
-
 // ----------------------------- //
 // START OF FUNCTION DEFINITIONS //
 // ----------------------------- //
@@ -94,8 +92,6 @@ void updateLEDs(volatile bool motorState) {
   digitalWrite(motorEnabledLED, motorState ? HIGH : LOW);
   digitalWrite(motorDisabledLED, motorState ? LOW : HIGH);
 }
-
-
 
 // Utility functions for handling stepper motor spin
 void disableMotor() {
@@ -164,7 +160,6 @@ void stepperMotorUtility() {
   }
 }
 
-
 // Function to determine, in paralell, if and when limit switches are being hit
 bool limitPressed(int pin) {
   int buttonIndex = (pin == btnPinFrontLimit) ? 0 : 1;
@@ -183,7 +178,6 @@ bool limitPressed(int pin) {
   lastButtonState[buttonIndex] = reading;
   return buttonState[buttonIndex];
 }
-
 
 
 void setup() {

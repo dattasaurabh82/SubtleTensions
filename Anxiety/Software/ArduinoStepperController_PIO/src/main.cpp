@@ -24,6 +24,10 @@ TBD:
 #define motorEnabledLED 8
 #define motorDisabledLED 9
 
+// Solenoid valve pins
+#define fillSolenoid 14
+#define flowSolenoid 15
+
 
 // ----------------------------- //
 // START OF VARIABLE DEFINITIONS //
@@ -52,7 +56,7 @@ const unsigned long limitBtnDebounceDelay = 50;
 volatile bool movingAwayFromFrontLimit = false;
 volatile bool movingAwayFromBackLimit = false;
 unsigned long limitReleaseTime = 0;
-const unsigned long additionalMoveTime = 10000;  // 1 second of additional movement
+const unsigned long additionalMoveTime = 5000;  // 1 second of additional movement
 
 
 
@@ -61,13 +65,17 @@ volatile bool motorEnabled = false;
 volatile unsigned long stepSpeedinUS = 500;  // Some initial value (anyways, will get replaced as per action)
 unsigned long lastTime = 0;
 
-const unsigned long reverseSpeed = 50;   // 50
-const unsigned long forwardSpeed = 500;  // 500
-const unsigned long limitRetractionSpeed = 50; // 25
+const unsigned long reverseSpeed = 100;  // 100
+const unsigned long forwardSpeed = 100;  // 2500
+const unsigned long limitRetractionSpeed = 50;
 
 // --------------------------- //
 // END OF VARIABLE DEFINITIONS //
 // --------------------------- //
+
+
+
+
 
 // ----------------------------- //
 // START OF FUNCTION DEFINITIONS //
@@ -92,6 +100,8 @@ void updateLEDs(volatile bool motorState) {
   digitalWrite(motorEnabledLED, motorState ? HIGH : LOW);
   digitalWrite(motorDisabledLED, motorState ? LOW : HIGH);
 }
+
+
 
 // Utility functions for handling stepper motor spin
 void disableMotor() {
@@ -160,6 +170,7 @@ void stepperMotorUtility() {
   }
 }
 
+
 // Function to determine, in paralell, if and when limit switches are being hit
 bool limitPressed(int pin) {
   int buttonIndex = (pin == btnPinFrontLimit) ? 0 : 1;
@@ -177,6 +188,24 @@ bool limitPressed(int pin) {
 
   lastButtonState[buttonIndex] = reading;
   return buttonState[buttonIndex];
+}
+
+void ctrlValveStatesFillSyringe() {
+  Serial.println("Closing Flow Valve.");
+  digitalWrite(flowSolenoid, HIGH);  // close main outgoing flow valve
+  delay(1000);
+  Serial.println("Opening Refill Valve.");
+  digitalWrite(fillSolenoid, LOW);  // open intake re-fill valve
+  delay(1000);
+}
+
+void ctrlValveStatesFlowSyringe() {
+  Serial.println("Closing Refill Valve.");
+  digitalWrite(fillSolenoid, HIGH);  // close intake re-fill valve
+  delay(1000);
+  Serial.println("Opening Flow Valve.");
+  digitalWrite(flowSolenoid, LOW);  // open main outgoing flow valve
+  delay(1000);
 }
 
 
@@ -220,6 +249,11 @@ void setup() {
   updateLEDs(motorEnabled);
   delay(500);
 
+  // Solenoid valve ctrl pins
+  pinMode(fillSolenoid, OUTPUT);
+  pinMode(flowSolenoid, OUTPUT);
+  ctrlValveStatesFlowSyringe();
+
   Serial.println("System initialized.");
 }
 
@@ -256,7 +290,8 @@ void loop() {
   // -------------------------------------------------------------------- //
   if (forwardMotorDirBtnPressed) {
     Serial.println("\nFORWARD btn pressed");
-    forwardMotor(forwardSpeed);  // low step speed in micro-sec
+    ctrlValveStatesFlowSyringe();  // Close Refill Valve & Open Main Valve
+    forwardMotor(forwardSpeed);    // Go forward in low speed (low step speed in micro-sec)
     forwardMotorDirBtnPressed = false;
     delay(1000);
   }
@@ -266,7 +301,8 @@ void loop() {
   // --------------------------------------------------------------------- //
   if (reverseMotorDirBtnPressed) {
     Serial.println("\nREVERSE btn pressed");
-    reverseMotor(reverseSpeed);  // high step speed in micro-sec
+    ctrlValveStatesFillSyringe();  // Close Main Valve & Open Refill Valve
+    reverseMotor(reverseSpeed);    // Reverse in high speed (high step speed in micro-sec)
     reverseMotorDirBtnPressed = false;
     delay(1000);
   }
@@ -280,6 +316,7 @@ void loop() {
 
   if (frontLimitPressed && !movingAwayFromFrontLimit) {
     Serial.println("\nFront Limit Button Pressed. Reversing!");
+    ctrlValveStatesFillSyringe();  // Close Main Valve & Open Refill Valve
     reverseMotor(limitRetractionSpeed);
     movingAwayFromFrontLimit = true;
   } else if (!frontLimitPressed && movingAwayFromFrontLimit) {
@@ -294,6 +331,7 @@ void loop() {
 
   if (backLimitPressed && !movingAwayFromBackLimit) {
     Serial.println("\nBack Limit Button Pressed. Moving Forward!");
+    ctrlValveStatesFlowSyringe();  // Close Refill Valve & Open Main Valve 
     forwardMotor(limitRetractionSpeed);
     movingAwayFromBackLimit = true;
   } else if (!backLimitPressed && movingAwayFromBackLimit) {

@@ -6,7 +6,12 @@
     'theme': 'base',
     'themeVariables': {
       'fontFamily': 'arial',
-      'fontSize': '16px'
+      'fontSize': '16px',
+      'lineColor': '#FF0000',
+      'mainBkg': '#f9f9f9',
+      'primaryColor': '#FF0000',
+      'edgeLabelBackground': '#fff',
+      'arrowheadColor': '#FF0000'
     },
     'flowchart': {
       'nodeSpacing': 50,
@@ -60,4 +65,6 @@ flowchart LR
     L2 --> F2
     
     P3 --> MS[Toggle Step Pin]:::action
+    
+    Loop --> Loop
 ```

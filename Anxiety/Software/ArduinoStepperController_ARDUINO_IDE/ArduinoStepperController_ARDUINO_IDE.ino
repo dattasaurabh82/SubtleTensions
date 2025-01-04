@@ -169,7 +169,7 @@ void stepperMotorUtility() {
 }
 
 
-// Function to determine, in paralell, if and when limit switches are being hit
+// Function to determine, in parallel, if and when limit switches are being hit
 bool limitPressed(int pin) {
   int buttonIndex = (pin == btnPinFrontLimit) ? 0 : 1;
   bool reading = digitalRead(pin);

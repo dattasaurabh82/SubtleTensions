@@ -119,6 +119,14 @@ void enableMotor() {
     // Enable the motor motion
     Serial.println("Enabling Motor...");
     digitalWrite(motorEnablePin, HIGH);
+    delay(10);
+    while(digitalRead(motorEnablePin) != HIGH){
+      Serial.println("Motor Enablement Failed!");
+      Serial.println("Retrying ...");
+      motorEnabled = false;
+      digitalWrite(motorEnablePin, HIGH);
+      delay(100);
+    }
     motorEnabled = true;
     updateLEDs(motorEnabled);
     Serial.println("Enabled Motor!");

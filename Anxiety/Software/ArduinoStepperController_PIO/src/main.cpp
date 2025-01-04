@@ -1,37 +1,71 @@
+/**
+* @file syringe_pump_control.cpp
+* @brief Stepper motor controller for automated syringe pump system
+* @details Controls bi-directional stepper motor movement with limit switches,
+*          solenoid valves, and status LEDs for a medical syringe pump
+* @author Saurabh Datta
+* @date Nov 2024
+* 
+* @note Built for Arduino Pro Micro (ATmega32U4) or Arduino Micro: https://amzn.eu/d/dSED3HR
+* @warning Medical device - requires validation before clinical use
+*/
+
 #include <Arduino.h>
 
 /*
 TBD:
-1. Double click forward button, increases speed to move forward.
-2. Check the actual pin state of Motor Enable Pin and and then update the LEDs.
+* Double click forward button, increases speed to move forward.
 */
 
-// Stepper Motor ctrl pin definitions
+
+/** Pin Definitions Section
+* @defgroup PinDefinitions Hardware Pin Mappings
+* @{
+*/
+/**
+* @brief Stepper Motor Control Pins
+* @details Defines pins for enable, direction and pulse control
+*/
 #define motorEnablePin 4
 #define motorDirPin 5
 #define motorPulPin 6
 
+
+/**
+* @brief Input Button Pins 
+* @details Control buttons and limit switch inputs
+*/
 // Button pins definition (Stepper motor Action buttons)
 #define btnPinToEnableMotor 2
 #define btnPinToReverseMotor 3
 #define btnPinToForwardMotor 7
-
 // Limit button pin definitions
 #define btnPinFrontLimit 16
 #define btnPinBackLimit 10
 
+/**
+* @brief Output Control Pins
+* @details LED indicators and solenoid valve controls
+* @{
+*/
 // LED pins definition
-#define motorEnabledLED 8
-#define motorDisabledLED 9
-
+#define motorEnabledLED 8   // Non-PWM pin
+#define motorDisabledLED 9  // PWM enabled pin
 // Solenoid valve pins
 #define fillSolenoid 14
 #define flowSolenoid 15
+/** @} */ // End of pin definitions
 
 
-// ----------------------------- //
-// START OF VARIABLE DEFINITIONS //
-// ----------------------------- //
+
+/**
+* @brief Global State Variables
+* @details Tracks system state including:
+* - Button debounce timing
+* - Motor movement state
+* - Limit switch states
+* - Movement timing parameters
+*/
 // Button click handling variables
 volatile bool enableMotorBtnPressed = false;
 volatile unsigned long lastDebounceTimeForEnableMotorBtnPress = 0;
@@ -58,8 +92,6 @@ volatile bool movingAwayFromBackLimit = false;
 unsigned long limitReleaseTime = 0;
 const unsigned long additionalMoveTime = 5000;  // 1 second of additional movement
 
-
-
 // Stepper Motor motion ctrl variables
 volatile bool motorEnabled = false;
 volatile unsigned long stepSpeedinUS = 500;  // Some initial value (anyways, will get replaced as per action)
@@ -69,41 +101,49 @@ const unsigned long reverseSpeed = 100;  // 100
 const unsigned long forwardSpeed = 100;  // 2500
 const unsigned long limitRetractionSpeed = 50;
 
-// --------------------------- //
-// END OF VARIABLE DEFINITIONS //
-// --------------------------- //
 
 
 
-
-
-// ----------------------------- //
-// START OF FUNCTION DEFINITIONS //
-// ----------------------------- //
+/**
+* @brief Button Press ISR Functions
+* @details Interrupt handlers for motor control buttons
+* @param None
+* @return None
+*/
 // ISR function to detect if the stepper motor enable/disable toggle button was pressed
 void enableMotorCtrlISR() {
   enableMotorBtnPressed = true;
 }
-
 // ISR function to detect if the stepper motor is called upon to go in reverse (to fill the syringe)
 void reverseMotorDirISR() {
   reverseMotorDirBtnPressed = true;
 }
-
 // ISR function to detect if the stepper motor is called upon to go forward in reverse (to fill the syringe)
 void forwardMotorDirISR() {
   forwardMotorDirBtnPressed = true;
 }
 
-// Utility function to display state of stepper motor (enabled/disabled)
+
+/**
+* @brief Updates status LEDs based on motor state
+* @param motorState [in] TRUE: motor enabled, FALSE: motor disabled
+* @note Pin 8: Digital output, Pin 9: PWM (brightness: 5)
+*/
 void updateLEDs(volatile bool motorState) {
   digitalWrite(motorEnabledLED, motorState ? HIGH : LOW);
-  digitalWrite(motorDisabledLED, motorState ? LOW : HIGH);
+  // digitalWrite(motorDisabledLED, motorState ? LOW : HIGH);
+  analogWrite(motorDisabledLED, motorState ? 0 : 5);
 }
 
 
-
-// Utility functions for handling stepper motor spin
+/**
+* @brief Motor Control Functions
+* @details Core functions for motor operation:
+* - Enable/disable motor
+* - Direction control
+* - Speed control
+* - Emergency stop handling
+*/
 void disableMotor() {
   // If motor was enabled
   if (motorEnabled) {
@@ -121,6 +161,14 @@ void enableMotor() {
     // Enable the motor motion
     Serial.println("Enabling Motor...");
     digitalWrite(motorEnablePin, HIGH);
+    delay(10);
+    while (digitalRead(motorEnablePin) != HIGH) {
+      Serial.println("Motor Enablement Failed!");
+      Serial.println("Retrying ...");
+      motorEnabled = false;
+      digitalWrite(motorEnablePin, HIGH);
+      delay(100);
+    }
     motorEnabled = true;
     updateLEDs(motorEnabled);
     Serial.println("Enabled Motor!");
@@ -171,7 +219,13 @@ void stepperMotorUtility() {
 }
 
 
-// Function to determine, in paralell, if and when limit switches are being hit
+/**
+* @brief Limit Switch Handler
+* @details Processes limit switch inputs with debouncing in a non-blocking fashion
+* @param pin Input pin to check
+* @return bool TRUE if switch is pressed
+*/
+// Function to determine, in parallel, if and when limit switches are being hit
 bool limitPressed(int pin) {
   int buttonIndex = (pin == btnPinFrontLimit) ? 0 : 1;
   bool reading = digitalRead(pin);
@@ -190,6 +244,13 @@ bool limitPressed(int pin) {
   return buttonState[buttonIndex];
 }
 
+
+/**
+* @brief Valve Control Functions
+* @details Controls solenoid valves for:
+* - Syringe filling operation
+* - Flow dispensing operation 
+*/
 void ctrlValveStatesFillSyringe() {
   Serial.println("Closing Flow Valve.");
   digitalWrite(flowSolenoid, HIGH);  // close main outgoing flow valve
@@ -207,6 +268,7 @@ void ctrlValveStatesFlowSyringe() {
   digitalWrite(flowSolenoid, LOW);  // open main outgoing flow valve
   delay(1000);
 }
+
 
 
 void setup() {
@@ -228,7 +290,7 @@ void setup() {
   pinMode(btnPinFrontLimit, INPUT_PULLUP);
   pinMode(btnPinBackLimit, INPUT_PULLUP);
 
-  // // Signal LED pins & State declaration
+  // Signal LED pins & State declaration
   pinMode(motorEnabledLED, OUTPUT);
   pinMode(motorDisabledLED, OUTPUT);
 
@@ -244,7 +306,6 @@ void setup() {
 
   // At Start: disable Motor
   motorEnabled = false;
-  // motorRunning = true;
   digitalWrite(motorEnablePin, motorEnabled);
   updateLEDs(motorEnabled);
   delay(500);
@@ -331,7 +392,7 @@ void loop() {
 
   if (backLimitPressed && !movingAwayFromBackLimit) {
     Serial.println("\nBack Limit Button Pressed. Moving Forward!");
-    ctrlValveStatesFlowSyringe();  // Close Refill Valve & Open Main Valve 
+    ctrlValveStatesFlowSyringe();  // Close Refill Valve & Open Main Valve
     forwardMotor(limitRetractionSpeed);
     movingAwayFromBackLimit = true;
   } else if (!backLimitPressed && movingAwayFromBackLimit) {

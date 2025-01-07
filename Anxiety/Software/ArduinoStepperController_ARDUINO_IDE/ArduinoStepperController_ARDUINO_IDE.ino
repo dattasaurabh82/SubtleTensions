@@ -52,7 +52,7 @@ TBD:
 // Solenoid valve pins
 #define fillSolenoid 14
 #define flowSolenoid 15
-/** @} */ // End of pin definitions
+/** @} */  // End of pin definitions
 
 
 
@@ -275,6 +275,10 @@ void setup() {
   pinMode(LED_BUILTIN_RX, INPUT);
 
   Serial.begin(115200);
+  while (!Serial) {
+    ;
+  }
+
 
   // Declare Button pins & ISR functions
   pinMode(btnPinToEnableMotor, INPUT_PULLUP);

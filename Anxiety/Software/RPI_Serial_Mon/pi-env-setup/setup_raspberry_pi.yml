@@ -40,7 +40,7 @@
           - tmux
           - neofetch
           - vim
-          - uhubctl
+          - screen
         state: present
         force_apt_get: 'yes'
 

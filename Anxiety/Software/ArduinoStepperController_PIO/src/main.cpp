@@ -277,6 +277,9 @@ void setup() {
   pinMode(LED_BUILTIN_RX, INPUT);
 
   Serial.begin(115200);
+  while(!Serial){
+    ;
+  }
 
   // Declare Button pins & ISR functions
   pinMode(btnPinToEnableMotor, INPUT_PULLUP);

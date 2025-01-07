@@ -52,7 +52,8 @@
         path: /home/{{ ansible_user }}/.bashrc
         block: |
           # Serial Monitor Launch Prompt
-          echo -n "Launch serial monitor? (y/N): "
+          echo ""
+          echo -en "\033[33mLaunch serial monitor?\033[0m \033[34m(y\033[0m/\033[31mN\033[0m): "
           read -t 10 answer
 
           if [[ $answer =~ ^[Yy]$ ]]; then

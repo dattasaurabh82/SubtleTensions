@@ -33,7 +33,7 @@
         group: root
         mode: '0644'
 
-    - name: Install required packages
+    - name: Install required packages (incl. new ones)
       apt:
         name:
           - git
@@ -41,10 +41,34 @@
           - neofetch
           - vim
           - screen
+          - minicom
+          - lsof
+          - net-tools
         state: present
         force_apt_get: 'yes'
+
+    - name: Add serial monitor prompt to .bashrc
+      blockinfile:
+        path: /home/{{ ansible_user }}/.bashrc
+        block: |
+          # Serial Monitor Launch Prompt
+          echo -n "Launch serial monitor? (y/N): "
+          read -t 10 answer
+
+          if [[ $answer =~ ^[Yy]$ ]]; then
+              if [ -e "/dev/ttyACM0" ]; then
+                  sudo killall screen 2>/dev/null
+                  sleep 1
+                  screen /dev/ttyACM0 115200
+              else
+                  echo "Error: /dev/ttyACM0 not found!"
+                  echo "Check if device is connected."
+              fi
+          fi
+        marker: "# {mark} SERIAL MONITOR BLOCK"
+        create: yes
 
     - name: Display installation complete message
       debug:
         msg: >-
-          System Configuration and Installation complete! 
+          System Configuration and Installation complete!

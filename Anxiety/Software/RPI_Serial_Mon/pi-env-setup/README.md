@@ -9,7 +9,8 @@ When run from a client machine, it sshes into the PI, installs bunch of things, 
 - Sets a custom ASCII art Message of the Day (MOTD)
 - Updates the apt cache
 - Hides the Raspberry Pi logo during boot and disables it on the top left corner
-- Installs required packages (git, tmux, neofetch, vim, vlc)
+- Installs required packages (git, tmux, neofetch, vim, screen, minicom, lsof, net-tools)
+- Modifies .bashrc to launch prompt based serial monitor (screen session) whenever a fresh bash session (terminal) is launched.
 
 ## Pre-requisites
 
@@ -23,10 +24,10 @@ When run from a client machine, it sshes into the PI, installs bunch of things, 
 - Before running the ansible notebook, goes unsaid, make sure that you have [ansible installed](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) on your development client machine.  
 - Make Sure to edit the [inventory.ini](inventory.ini) to match pi's host name and user name. For example, my pi's (the one I'm using for the komorebi project) user is `serialmonitor` and the hostname is `serialmonitor.local` (see below).
 
-  ```ini
-  [raspberry_pi_3B+]
-     serialmonitor ansible_host=serialmonitor.local ansible_user=serialmonitor
-  ```
+```ini
+[raspberry_pi3_A_PLUS]
+   serialmonitor ansible_host=serialmonitor.local ansible_user=serialmonitor
+```
 
 ## Post Installation
 
@@ -36,4 +37,6 @@ TBD
 
 ### Run the notebook
 
-TBD
+```bash
+ansible-playbook -i inventory.ini setup_raspberry_pi.yml -vv
+```

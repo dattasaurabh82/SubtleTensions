@@ -1,16 +1,16 @@
-- name: Setup and Update Raspberry Pi for Bootable Serial Monitoer
-  hosts: raspberry_pi_3B+
+- name: Setup and Update Raspberry Pi for Bootable Serial Monitor
+  hosts: raspberry_pi3_A_PLUS
   become: 'yes'
   vars:
     motd_content: |
-      ____ _____ _____ _____ _____ __       _____ _____ _____ 
+      ______ _____ _____ _____ _____ __       _____ _____ _____ 
       |   __|   __| __  |     |  _  |  |     |     |     |   | |
       |__   |   __|    -|-   -|     |  |__   | | | |  |  | | | |
       |_____|_____|__|__|_____|__|__|_____|  |_|_|_|_____|_|___|
                                                           
-       Welcome to Serial Monitor
-       Saurabh Datta
-       2024                                             
+      Welcome to Serial Monitor
+      By: Saurabh Datta
+      2024-2025                                             
 
   tasks:
     - name: Update apt cache (equivalent to apt-get update -y)
@@ -40,7 +40,7 @@
           - tmux
           - neofetch
           - vim
-          - vlc
+          - uhubctl
         state: present
         force_apt_get: 'yes'
 

@@ -18,7 +18,13 @@
         update_cache: 'yes'
         force_apt_get: 'yes'
     
-    - name: Hide Raspberry Pi logo during boot and disable logo on top left corner
+    - name: Hide Raspberry Pi - Remove any existing logo parameters from cmdline.txt
+      replace:
+        path: /boot/firmware/cmdline.txt
+        regexp: ' logo\.nologo( console_logo\.enabled=[01])?'
+        replace: ''
+
+    - name: Hide Raspberry Pi - Add logo parameters to cmdline.txt once
       lineinfile:
         path: /boot/firmware/cmdline.txt
         regexp: '^(.*)$'

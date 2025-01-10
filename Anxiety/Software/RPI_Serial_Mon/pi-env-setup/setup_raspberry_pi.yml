@@ -45,12 +45,33 @@
           - lsof
           - net-tools
           - moreutils
+          - curl
         state: present
         force_apt_get: 'yes'
 
-    - name: Add serial monitor prompt to .bashrc
+    - name: Download and install Arduino CLI
+      shell: |
+        curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+        mv ./bin/arduino-cli /usr/bin/
+      args:
+        creates: /usr/bin/arduino-cli
+  
+    - name: Backup existing .bashrc
+      copy:
+        src: /home/{{ ansible_user }}/.bashrc
+        dest: /home/{{ ansible_user }}/.bashrc.backup
+        remote_src: yes
+        force: no
+
+    - name: Create new .bashrc file
+      copy:
+        src: /home/{{ ansible_user }}/.bashrc
+        dest: /home/{{ ansible_user }}/.bashrc.new
+        remote_src: yes
+
+    - name: Add serial monitor prompt to .bashrc.new
       blockinfile:
-        path: /home/{{ ansible_user }}/.bashrc
+        path: /home/{{ ansible_user }}/.bashrc.new
         block: |
           # Serial Monitor Launch Prompt
           echo ""

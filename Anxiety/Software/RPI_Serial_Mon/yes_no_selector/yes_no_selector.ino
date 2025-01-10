@@ -1,7 +1,7 @@
 #include "Keyboard.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+// #pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 const int yPin = 2;     // Pin for 'y'
 const int nPin = 3;     // Pin for 'N'
@@ -20,8 +20,8 @@ void setup() {
 void loop() {
   // Check for 'y' button
   if (digitalRead(yPin) == LOW) {
-    Keyboard.print('y');
-    Keyboard.write(KEY_RETURN);
+    Keyboard.println('y');
+    // Keyboard.write(KEY_RETURN);
     delay(200);  // Debounce delay
     while (digitalRead(yPin) == LOW)
       ;  // Wait for button release
@@ -29,8 +29,8 @@ void loop() {
 
   // Check for 'N' button
   if (digitalRead(nPin) == LOW) {
-    Keyboard.print('N');
-    Keyboard.write(KEY_RETURN);
+    Keyboard.println('N');
+    // Keyboard.write(KEY_RETURN);
     delay(200);  // Debounce delay
     while (digitalRead(nPin) == LOW)
       ;  // Wait for button release

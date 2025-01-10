@@ -57,3 +57,32 @@ dtoverlay=vc4-kms-dsi-7inch
 sudo nano /boot/firmware/cmdline.txt
 video=DSI-1:800x480M@60,rotate=180
 ```
+
+## Installing arduino-cli
+
+The `arduino-cli` gets installed anyways if you ran the ansible notebook. But now let's install the core and libs
+
+```bash
+# Install core, board amd libs
+arduino-cli core list
+arduino-cli core install arduino:avr
+arduino-cli lib install Keyboard
+
+# For ARDUINO MICRO (Main Motor controller of the Installation)
+# COMPILE
+arduino-cli compile --fqbn arduino:avr:micro SubtleTensions/Anxiety/Software/ArduinoStepperController_ARDUINO_IDE/ -v
+#UPLOAD
+# First Find your board and note your port
+arduino-cli board list
+# Then use that port to upload to your Arduino Micro 
+arduino-cli upload -p [YOUR_PORT] --fqbn arduino:avr:micro SubtleTensions/Anxiety/Software/ArduinoStepperController_ARDUINO_IDE/ -v
+
+# For ARDUINO LEONARDO (Yes/No Keyboard Emulator for PI)
+# COMPILE
+arduino-cli compile --fqbn arduino:avr:leonardo SubtleTensions/Anxiety/Software/RPI_Serial_Mon/yes_no_selector/ -v
+#UPLOAD
+# First Find your board and note your port
+arduino-cli board list
+# Then use that port to upload to your Arduino Leonardo 
+arduino-cli upload --input-dir SubtleTensions/Anxiety/Software/RPI_Serial_Mon/yes_no_selector/binary -p [YOUR_PORT] --fqbn arduino:avr:leonardo SubtleTensions/Anxiety/Software/RPI_Serial_Mon/yes_no_selector/
+```

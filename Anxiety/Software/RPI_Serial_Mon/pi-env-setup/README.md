@@ -40,3 +40,20 @@ TBD
 ```bash
 ansible-playbook -i inventory.ini setup_raspberry_pi.yml -vv
 ```
+
+## Display
+
+Waveshare 7"
+
+```bash
+sudo nano /boot/firmware/config.txt
+#DSI1 Use
+dtoverlay=vc4-kms-dsi-7inch
+#DSI0 Use
+#dtoverlay=vc4-kms-dsi-7inch,dsi0
+```bash
+
+```bash
+sudo nano /boot/firmware/cmdline.txt
+video=DSI-1:800x480M@60,rotate=180
+```

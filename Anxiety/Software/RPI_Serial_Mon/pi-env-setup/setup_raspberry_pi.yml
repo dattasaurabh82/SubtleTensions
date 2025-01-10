@@ -1,5 +1,5 @@
 - name: Setup and Update Raspberry Pi for Bootable Serial Monitor
-  hosts: raspberry_pi3_A_PLUS
+  hosts: raspberry_pi4
   become: 'yes'
   vars:
     motd_content: |
@@ -44,6 +44,7 @@
           - minicom
           - lsof
           - net-tools
+          - moreutils
         state: present
         force_apt_get: 'yes'
 

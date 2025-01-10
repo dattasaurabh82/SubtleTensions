@@ -38,7 +38,7 @@ TBD
 ### Run the notebook
 
 ```bash
-ANSIBLE_VERBOSITY=1 ansible-playbook -i inventory.ini setup_raspberry_
+ANSIBLE_VERBOSITY=1 ansible-playbook -i inventory.ini setup_raspberry_pi.yml
 pi.yml
 ```
 

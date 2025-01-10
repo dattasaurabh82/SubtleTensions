@@ -1,7 +1,7 @@
 - name: Setup and Update Raspberry Pi for Bootable Serial Monitor
   hosts: raspberry_pi4
   become: 'yes'
-  gather_facts: no  # Add this to prevent initial fact gathering
+  gather_facts: no
   
   pre_tasks:
     - name: Try pinging .local domain
@@ -9,17 +9,20 @@
       register: ping_local
       ignore_errors: yes
       delegate_to: localhost
+      become: no  # Add this to prevent sudo usage
 
     - name: Try pinging .lan domain if .local fails
       command: ping -c 1 serialmonitor.lan
       register: ping_lan
       ignore_errors: yes
       delegate_to: localhost
+      become: no  # Add this to prevent sudo usage
       when: ping_local.rc != 0
 
     - name: Set host address based on ping results
       set_fact:
         ansible_host: "{{ 'serialmonitor.local' if ping_local.rc == 0 else 'serialmonitor.lan' }}"
+
     - name: Gathering Facts
       setup:
       register: host_facts
@@ -27,7 +30,8 @@
     - name: Display some gathered facts
       debug:
         msg: "OS: {{ host_facts.ansible_facts.ansible_distribution }}, Version: {{ host_facts.ansible_facts.ansible_distribution_version }}"
-      
+  
+  
   vars:
     motd_content: |
       ______ _____ _____ _____ _____ __       _____ _____ _____ 

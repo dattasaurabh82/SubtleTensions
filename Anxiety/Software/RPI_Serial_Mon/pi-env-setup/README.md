@@ -76,7 +76,7 @@ arduino-cli compile --fqbn arduino:avr:micro SubtleTensions/Anxiety/Software/Ard
 # First Find your board and note your port
 arduino-cli board list
 # Then use that port to upload to your Arduino Micro 
-arduino-cli upload -p [YOUR_PORT] --fqbn arduino:avr:micro SubtleTensions/Anxiety/Software/ArduinoStepperController_ARDUINO_IDE/ -v
+arduino-cli upload -t -p [YOUR_PORT] --fqbn arduino:avr:micro SubtleTensions/Anxiety/Software/ArduinoStepperController_ARDUINO_IDE/ -v
 
 # For ARDUINO LEONARDO (Yes/No Keyboard Emulator for PI)
 # COMPILE
@@ -85,5 +85,5 @@ arduino-cli compile --fqbn arduino:avr:leonardo SubtleTensions/Anxiety/Software/
 # First Find your board and note your port
 arduino-cli board list
 # Then use that port to upload to your Arduino Leonardo 
-arduino-cli upload -p [YOUR_PORT] --fqbn arduino:avr:leonardo SubtleTensions/Anxiety/Software/RPI_Serial_Mon/yes_no_selector/ -v
+arduino-cli upload -t -p [YOUR_PORT] --fqbn arduino:avr:leonardo SubtleTensions/Anxiety/Software/RPI_Serial_Mon/yes_no_selector/ -v
 ```

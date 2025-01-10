@@ -85,5 +85,5 @@ arduino-cli compile --fqbn arduino:avr:leonardo SubtleTensions/Anxiety/Software/
 # First Find your board and note your port
 arduino-cli board list
 # Then use that port to upload to your Arduino Leonardo 
-arduino-cli upload --input-dir SubtleTensions/Anxiety/Software/RPI_Serial_Mon/yes_no_selector/binary -p [YOUR_PORT] --fqbn arduino:avr:leonardo SubtleTensions/Anxiety/Software/RPI_Serial_Mon/yes_no_selector/
+arduino-cli upload -p [YOUR_PORT] --fqbn arduino:avr:leonardo SubtleTensions/Anxiety/Software/RPI_Serial_Mon/yes_no_selector/ -v
 ```

@@ -85,6 +85,15 @@
           - curl
         state: present
         force_apt_get: 'yes'
+    
+    - name: Check if python3, venv, and dev packages are installed
+      apt:
+        name:
+          - python3
+          - python3-venv
+          - python3-dev
+        state: present
+        force_apt_get: 'yes'
 
     - name: Download and install Arduino CLI
       shell: |

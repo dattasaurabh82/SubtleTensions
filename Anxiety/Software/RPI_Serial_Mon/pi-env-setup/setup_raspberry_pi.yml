@@ -55,6 +55,28 @@
         mv ./bin/arduino-cli /usr/bin/
       args:
         creates: /usr/bin/arduino-cli
+    
+    - name: Check if SubtleTensions repo exists
+      stat:
+        path: /home/{{ ansible_user }}/SubtleTensions
+      register: repo_check
+
+    - name: Clone SubtleTensions repo if not exists
+      git:
+        repo: https://github.com/dattasaurabh82/SubtleTensions.git
+        dest: /home/{{ ansible_user }}/SubtleTensions
+      when: not repo_check.stat.exists
+
+    - name: Update SubtleTensions repo if exists
+      shell: cd /home/{{ ansible_user }}/SubtleTensions && git pull
+      when: repo_check.stat.exists
+    
+    - name: Copy serial monitor launch script to Pi
+      copy:
+        src: launch_serial_monitor.sh
+        dest: /home/{{ ansible_user }}/launch_serial_monitor.sh
+        mode: '0755'
+        force: yes
   
     - name: Backup existing .bashrc
       copy:
@@ -69,27 +91,13 @@
         dest: /home/{{ ansible_user }}/.bashrc.new
         remote_src: yes
 
-    - name: Add serial monitor prompt to .bashrc.new
+    - name: Update .bashrc.new to call the script
       blockinfile:
         path: /home/{{ ansible_user }}/.bashrc.new
         block: |
-          # Serial Monitor Launch Prompt
-          PORT=$(arduino-cli board list | awk '/Arduino Micro/ {print $1}')
-          echo ""
-          echo -en "\033[33mLaunch serial monitor?\033[0m \033[34m(y\033[0m/\033[31mN\033[0m): "
-          read -t 10 answer
-
-          if [[ $answer =~ ^[Yy]$ ]]; then
-              if [ -e "$PORT" ]; then
-                  sudo killall screen 2>/dev/null
-                  sleep 1
-                  screen "$PORT" 115200
-              else
-                  echo "Error: $PORT not found!"
-                  echo "Check if device is connected."
-              fi
-          fi
-        marker: "# {mark} SERIAL MONITOR BLOCK"
+          # Serial Monitor Launch Script
+          ~/launch_serial_monitor.sh
+        marker: "# {mark} SERIAL MONITOR SCRIPT"
         create: yes
 
     - name: Display installation complete message
